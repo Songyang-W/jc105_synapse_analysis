@@ -1,6 +1,6 @@
 # jc105_synapse_analysis
 
-# Lookup Root IDs from Shard IDs
+# Shard_to_root_mapper
 
 This script automates the process of mapping **shard IDs** to their corresponding **root IDs** using the [CAVEclient](https://github.com/seung-lab/CAVEclient) for the `jchen_mouse_cortex` project.
 
@@ -11,7 +11,7 @@ This script automates the process of mapping **shard IDs** to their correspondin
 - Filter and display rows that match a **target root ID** (default: `720575941088408585`).
 - Optionally save the updated table back to Excel.
 
-# Proofread Neuron Connectivity Analysis
+# Proofread connectivity
 
 This script analyzes synaptic connectivity between a set of **proofread neurons** in the `jchen_mouse_cortex` dataset using the [CAVEclient](https://github.com/seung-lab/CAVEclient).
 
