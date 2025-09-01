@@ -61,7 +61,7 @@ def view_connections_between_two_cells(pre_id,post_id):
     return link
 
 
-pre_id  = 720575941088408585
-post_id = 720575941153476300
+pre_id  = 720575941071680793
+post_id = 720575941057622500
 link = view_connections_between_two_cells(pre_id,post_id)
 link
