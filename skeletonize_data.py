@@ -221,3 +221,20 @@ viewer = (
 link = viewer.to_link_shortener(client=client)
 print(link)
 
+#%% --- Map L2 IDs to supervoxels and assign axon/dendrite labels ---
+
+axon_l2_ids = nrn.anno.lvl2_ids['lvl2_id']
+root_column = nrn.anno.segment_properties['is_root']
+axon_mesh_idxs = nrn.anno.is_axon["mesh_index"].to_numpy(int)
+axon_l2_id = set([axon_l2_ids[axon_ind] for axon_ind in axon_mesh_idxs])
+
+records = []
+for i, l2 in enumerate(axon_l2_ids):
+    children = client.chunkedgraph.get_children(l2)
+    is_axon = int(l2 in axon_l2_id)
+    is_root = bool(root_column.iloc[i])
+    for sv in children:
+        records.append({"l2_id": l2, "supervoxel_id": sv,
+                        "is_axon": is_axon, "is_root": is_root})
+
+axon_dend_df = pd.DataFrame(records)

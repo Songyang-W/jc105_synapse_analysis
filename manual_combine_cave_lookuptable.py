@@ -14,6 +14,8 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 import pandas as pd
 
+
+
 client = CAVEclient("jchen_mouse_cortex")
 
 table_directory = '/Users/songyangwang/Downloads/LOOKUP_TABLE.xlsx'
@@ -21,11 +23,14 @@ lookuptable_df = pd.read_excel(table_directory, sheet_name="MASTER_LIST",
                    dtype={
         "SHARD ID": "string",
         "FINAL NEURON ID": "string",
-        "EM NAME (Nuclear)": "string"
+        "EM NAME (Nuclear)": "string",
     })
 
-
+pre_post_synapse_count_directory = '/Users/songyangwang/repos/jc105_synapse_analysis/synapse_data/pre_post_synapse_count.csv'
+pre_post_df = pd.read_csv(pre_post_synapse_count_directory)
 proofread_id = [720575941034757380, 720575941051511894, 720575941057622500, 720575941059432229, 720575941061126260, 720575941061128820, 720575941061146740, 720575941064570382, 720575941067985577, 720575941070678791, 720575941070687028, 720575941071245374, 720575941071680793, 720575941073277164, 720575941073777040, 720575941073819897, 720575941074810450, 720575941075022386, 720575941076332278, 720575941076653272, 720575941076758746, 720575941077619944, 720575941077776594, 720575941077787090, 720575941077967095, 720575941077982455, 720575941078093229, 720575941079569046, 720575941080298878, 720575941081168930, 720575941086022449, 720575941086431003, 720575941086890090, 720575941086891882, 720575941086918398, 720575941088008859, 720575941088408585, 720575941089298708, 720575941089521081, 720575941089937542, 720575941090078452, 720575941090093556, 720575941091424604, 720575941091445340, 720575941091459932, 720575941091629489, 720575941092450933, 720575941092498657, 720575941092554470, 720575941092565911, 720575941092573335, 720575941092921542, 720575941093443783, 720575941094478620, 720575941094704098, 720575941095549619, 720575941095921486, 720575941096535230, 720575941096669548, 720575941096896673, 720575941096935073, 720575941097347217, 720575941098226189, 720575941098234637, 720575941098551211, 720575941098673705, 720575941098730638, 720575941099131663, 720575941099212764, 720575941099267859, 720575941099645213, 720575941100429392, 720575941101423751, 720575941101452679, 720575941101509409, 720575941102657600, 720575941102668096, 720575941102712896, 720575941102870780, 720575941103533573, 720575941103924589, 720575941104131039, 720575941104297454, 720575941104309998, 720575941104699619, 720575941104700643, 720575941104705251, 720575941105379336, 720575941106152505, 720575941106477402, 720575941106600928, 720575941106639968, 720575941107285320, 720575941107298120, 720575941107437825, 720575941109570314, 720575941109605752, 720575941113287333, 720575941114006852, 720575941114011460, 720575941114493115, 720575941114493371, 720575941114494139, 720575941114687139, 720575941114711203, 720575941114933738, 720575941115332394, 720575941115960573, 720575941116548740, 720575941116572664, 720575941116663435, 720575941116976341, 720575941116997589, 720575941117000149, 720575941118374002, 720575941118374514, 720575941120382861, 720575941120702062, 720575941120904478, 720575941121184239, 720575941123725826, 720575941123736578, 720575941124436677, 720575941125743543, 720575941125953181, 720575941126229860, 720575941127918527, 720575941128195568, 720575941128216130, 720575941128500170, 720575941128608670, 720575941128703583, 720575941131576319, 720575941131588607, 720575941132405960, 720575941134134113, 720575941136000282, 720575941139252669, 720575941139510444, 720575941143312378, 720575941144379311, 720575941145828823, 720575941148267857, 720575941149954781, 720575941149993181, 720575941150910648, 720575941152155190, 720575941152796324, 720575941153471868, 720575941153561801, 720575941153566409, 720575941154431375, 720575941154453647, 720575941156114821, 720575941157944107, 720575941158042818, 720575941162298010, 720575941174542567, 720575941183694464, 720575941190025408, 720575941239851589]
+selected_ids=[720575941057622500, 720575941061146740, 720575941064570382, 720575941070687028, 720575941071245374, 720575941073277164, 720575941073777040, 720575941074810450, 720575941075022386, 720575941076653272, 720575941077619944, 720575941077787090, 720575941077967095, 720575941078093229, 720575941079569046, 720575941081168930, 720575941086890090, 720575941086918398, 720575941088008859, 720575941088408585, 720575941089521081, 720575941090093556, 720575941091424604, 720575941091459932, 720575941091629489, 720575941092554470, 720575941094478620, 720575941095921486, 720575941096535230, 720575941096669548, 720575941096896673, 720575941097347217, 720575941098226189, 720575941098234637, 720575941098551211, 720575941098673705, 720575941098730638, 720575941099131663, 720575941099267859, 720575941099645213, 720575941101452679, 720575941101509409, 720575941102870780, 720575941103924589, 720575941104131039, 720575941104297454, 720575941104705251, 720575941105379336, 720575941106152505, 720575941106600928, 720575941106639968, 720575941107285320, 720575941107298120, 720575941107437825, 720575941109605752, 720575941113287333, 720575941114006852, 720575941114011460, 720575941114493115, 720575941114494139, 720575941114711203, 720575941114933738, 720575941115960573, 720575941116548740, 720575941116572664, 720575941116663435, 720575941116976341, 720575941116997589, 720575941117000149, 720575941118374002, 720575941118374514, 720575941120382861, 720575941120702062, 720575941120904478, 720575941125743543, 720575941126229860, 720575941127918527, 720575941128195568, 720575941128216130, 720575941128703583, 720575941131588607, 720575941132405960, 720575941134134113, 720575941148267857, 720575941150910648, 720575941152155190, 720575941153561801, 720575941154431375, 720575941154453647, 720575941156114821, 720575941157944107, 720575941162298010, 720575941174542567, 720575941183694464]
+
 syn_proof_only_df = client.materialize.synapse_query(pre_ids=proofread_id,
                                                   post_ids=proofread_id,
                                                   remove_autapses=True,
@@ -39,6 +44,17 @@ syn_mat = syn_proof_only_df.pivot_table(index="pre_pt_root_id",
                                         aggfunc="count"
                                        ).fillna(0)
 syn_mat = syn_mat.reindex(index=np.array(syn_mat.columns)).fillna(0)
+index_order = syn_mat.index.astype(int)
+sorted_df = pre_post_df.set_index("cellid").loc[index_order].reset_index()
+syn_mat = syn_mat.astype(float)  # make sure it's float, so division works
+denom = sorted_df.set_index("pre_pt_root_id")["presynapse_total"]
+normalized_mat = syn_mat.div(denom, axis=0)
+
+
+# Restrict to selected_ids only
+syn_mat_selected = syn_mat.loc[selected_ids, selected_ids]
+normalized_mat_selected = normalized_mat.loc[selected_ids, selected_ids]
+
 
 fig, ax = plt.subplots(figsize=(7, 5), dpi=150)
 sns.heatmap(syn_mat, cmap="gray_r", xticklabels=[], yticklabels=[], 
@@ -46,10 +62,60 @@ sns.heatmap(syn_mat, cmap="gray_r", xticklabels=[], yticklabels=[],
             cbar_kws={"label": "Connected"})
 ax.set_title('Connectivity between proofread cells')
 
+#%%
+def _cast_to_target_dtype(s: pd.Series, to_int: bool):
+    if to_int:
+        return pd.to_numeric(s, errors='coerce').dropna().astype('int64')
+    else:
+        return s.astype(str).str.strip()
+ids_are_int = pd.api.types.is_integer_dtype(syn_proof_only_df['pre_pt_root_id'])    
+lookup_ids = _cast_to_target_dtype(lookuptable_df['FINAL NEURON ID'].dropna(), ids_are_int)
+lookup_func = lookuptable_df.loc[lookup_ids.index, 'Functional Category'].astype(str)
+id_to_func = pd.Series(lookup_func.values, index=lookup_ids.values)
+id_to_func = id_to_func[~id_to_func.index.duplicated(keep='first')]
+# Cast syn_proof_only_df id columns to the same dtype as the mapping keys
+if ids_are_int:
+    pre_ids  = pd.to_numeric(syn_proof_only_df['pre_pt_root_id'],  errors='coerce').astype('Int64')
+    post_ids = pd.to_numeric(syn_proof_only_df['post_pt_root_id'], errors='coerce').astype('Int64')
+else:
+    pre_ids  = syn_proof_only_df['pre_pt_root_id'].astype(str).str.strip()
+    post_ids = syn_proof_only_df['post_pt_root_id'].astype(str).str.strip()
+
+# Map to new columns
+syn_proof_only_df['pre_pt_function']  = pre_ids.map(id_to_func)
+syn_proof_only_df['post_pt_function'] = post_ids.map(id_to_func)
+
+# (Optional) Make missing labels explicit
+syn_proof_only_df[['pre_pt_function','post_pt_function']] = \
+    syn_proof_only_df[['pre_pt_function','post_pt_function']].fillna('Unknown')
+    
+    
+syn_mat_try = syn_proof_only_df.pivot_table(index="pre_pt_function", 
+                                        columns="post_pt_function", 
+                                        values="size", 
+                                        aggfunc="count"
+                                       ).fillna(0)
+fig, ax = plt.subplots(figsize=(7, 5), dpi=150)
+sns.heatmap(syn_mat_try>0, cmap="gray_r", 
+            #xticklabels=[], yticklabels=[], 
+            ax=ax, square=False,
+            cbar_kws={"label": "Connected"})
+ax.set_title('Connectivity between proofread cells')
 #%% filter the lookuptable_df so it only contains the proofread_id
 proofread_id_str = [str(i) for i in proofread_id]
 filtered_lookuptable_df = lookuptable_df[lookuptable_df['FINAL NEURON ID'].isin(proofread_id_str)]
 filtered_lookuptable_df = filtered_lookuptable_df[~filtered_lookuptable_df['Cell Type'].isna()]
+
+selected_id_str = [str(i) for i in selected_ids]
+filtered_lookuptable_selected_df = lookuptable_df[lookuptable_df['FINAL NEURON ID'].isin(selected_id_str)]
+filtered_lookuptable_selected_df = filtered_lookuptable_selected_df[~filtered_lookuptable_selected_df['Cell Type'].isna()]
+
+#%% some tiny functions
+def _return_xyz_coordinates(cell_id):
+    x=lookuptable_df['Xprod'][lookuptable_df['FINAL NEURON ID'] == str(cell_id)].astype(int).values[0].item()
+    y=lookuptable_df['Yprod'][lookuptable_df['FINAL NEURON ID'] == str(cell_id)].astype(int).values[0].item()
+    z=lookuptable_df['Zprod'][lookuptable_df['FINAL NEURON ID'] == str(cell_id)].astype(int).values[0].item()
+    return [x,y,z]
 
 #%% simple interaction between exc vs inh
 def sort_connectivity_matrix_exc_inh(
@@ -151,7 +217,7 @@ def plot_connectivity_matrix(
         yticklabels=False,
         ax=ax,
         square=True,
-        cbar_kws={"label": "Connected"}
+        cbar_kws={"label": "normalized synapse"}
     )
 
     # ---- Build labels (in first-seen order) and colors ----
@@ -196,7 +262,7 @@ def plot_connectivity_matrix(
 
 # Step 1: sort
 syn_sorted, order, types_ordered = sort_connectivity_matrix_exc_inh(
-    syn_mat, 
+    normalized_mat, 
     filtered_lookuptable_df,
     id_col='FINAL NEURON ID',
     type_col='Cell Type'
@@ -204,9 +270,24 @@ syn_sorted, order, types_ordered = sort_connectivity_matrix_exc_inh(
 
 # Step 2: plot
 ax, color_map = plot_connectivity_matrix(syn_sorted, types_ordered,
-                                         threshold=0, title="Connectivity between proofread cells")
+                                         threshold=0, 
+                                         title="Connectivity between proofread cells",
+                                         cmap='grey_r')
 plt.show()
 
+#%%
+# Step 1: sort
+syn_sorted, order, types_ordered = sort_connectivity_matrix_exc_inh(
+    normalized_mat_selected, 
+    filtered_lookuptable_selected_df,
+    id_col='FINAL NEURON ID',
+    type_col='Cell Type'
+)
+
+# Step 2: plot
+ax, color_map = plot_connectivity_matrix(syn_sorted, types_ordered,
+                                         threshold=0, title="Connectivity between proofread cells",cmap='RdBu_r')
+plt.show()
 
 #%% sort based on ant/pos only
 
@@ -291,14 +372,25 @@ def sort_connectivity_matrix_by_function(
     return syn_sorted, order, groups_ordered
 
 syn_sorted_func, order_func, groups_func = sort_connectivity_matrix_by_function(
-    syn_mat,
+    normalized_mat,
     filtered_lookuptable_df,
     id_col='FINAL NEURON ID',
     category_col='Functional Category'
 )
 
 # Then reuse your generic plotting function:
-plot_connectivity_matrix(syn_sorted_func, groups_func, title='Connectivity by functional groups');
+plot_connectivity_matrix(syn_sorted_func, groups_func, title='Connectivity by functional groups',cmap='RdBu_r');
+
+#%%
+syn_sorted_func, order_func, groups_func = sort_connectivity_matrix_by_function(
+    normalized_mat_selected,
+    filtered_lookuptable_selected_df,
+    id_col='FINAL NEURON ID',
+    category_col='Functional Category'
+)
+
+# Then reuse your generic plotting function:
+plot_connectivity_matrix(syn_sorted_func, groups_func, title='Connectivity by functional groups',cmap='RdBu_r');
 
 
 #%% replicate aaron's paper
@@ -408,11 +500,39 @@ def sort_connectivity_matrix_function_x_type(
     return syn_sorted, order, labels_ordered
 
 syn_sorted_fx, order_fx, labels_fx = sort_connectivity_matrix_function_x_type(
-    syn_mat,
+    normalized_mat,
     filtered_lookuptable_df,
     id_col='FINAL NEURON ID',
     func_col='Functional Category',
-    type_col='Cell Type'
+    type_col='Cell Type',
+    pair_order=(
+        'anterior-exc', 
+        'posterior-exc', 'other-exc', 'anterior-inh','posterior-inh',
+        'other-inh',
+        'other-other'  # safety tail for unlabeled types
+))
+
+# Your generic plotting function will auto-make colors/legend from labels_fx
+ax, color_map = plot_connectivity_matrix(
+    syn_sorted_fx,
+    labels_fx,
+    threshold=0.0,
+    title='Connectivity (anterior/posterior × exc/inh)',cmap='RdBu_r'
+)
+
+#%%
+syn_sorted_fx, order_fx, labels_fx = sort_connectivity_matrix_function_x_type(
+    normalized_mat_selected,
+    filtered_lookuptable_selected_df,
+    id_col='FINAL NEURON ID',
+    func_col='Functional Category',
+    type_col='Cell Type',
+    pair_order=(
+        'anterior-exc', 
+        'posterior-exc', 'other-exc', 'anterior-inh','posterior-inh',
+        'other-inh',
+        'other-other'  # safety tail for unlabeled types
+    )
 )
 
 # Your generic plotting function will auto-make colors/legend from labels_fx
@@ -420,8 +540,95 @@ ax, color_map = plot_connectivity_matrix(
     syn_sorted_fx,
     labels_fx,
     threshold=0.0,
-    title='Connectivity (anterior/posterior × exc/inh)'
+    title='Connectivity (anterior/posterior × exc/inh)',cmap='RdBu_r'
 )
+
+
+#%%
+def plot_connectivity_matrix_asymmetric(
+    mat: pd.DataFrame,
+    row_labels: pd.Series,
+    col_labels: pd.Series,
+    cmap='RdBu_r',
+    title='Subset connectivity',
+    cbar_label='normalized synapse'
+):
+    """
+    Heatmap with independent row/column label strips.
+    """
+    # ensure alignment
+    row_labels = row_labels.reindex(mat.index).fillna('Unlabeled').astype(str)
+    col_labels = col_labels.reindex(mat.columns).fillna('Unlabeled').astype(str)
+
+    fig, ax = plt.subplots(figsize=(7, 5), dpi=150)
+    sns.heatmap(
+        mat,
+        cmap=cmap,
+        xticklabels=False,
+        yticklabels=False,
+        ax=ax,
+        square=False,
+        cbar_kws={"label": cbar_label}
+    )
+
+    # Build palette from union of row+col labels
+    all_labs = pd.Index(pd.unique(pd.concat([row_labels, col_labels], axis=0)))
+    base = plt.get_cmap("tab20" if len(all_labs) > 10 else "tab10")
+    palette = [base(i) for i in range(max(10, len(all_labs)))]
+    color_map = {lab: palette[i % len(palette)] for i, lab in enumerate(all_labs)}
+
+    # Row strip (left)
+    row_colors = [color_map[l] for l in row_labels]
+    for i, c in enumerate(row_colors):
+        ax.add_patch(plt.Rectangle(
+            xy=(-0.01, i), width=0.01, height=1, color=c, lw=0,
+            transform=ax.get_yaxis_transform(), clip_on=False
+        ))
+
+    # Column strip (top)
+    col_colors = [color_map[l] for l in col_labels]
+    for i, c in enumerate(col_colors):
+        ax.add_patch(plt.Rectangle(
+            xy=(i, 1), height=0.01, width=1, color=c, lw=0,
+            transform=ax.get_xaxis_transform(), clip_on=False
+        ))
+
+    # Legend (only show unique labels actually present)
+    present_labs = pd.unique(pd.Index(row_labels).append(pd.Index(col_labels)))
+    legend_elements = [
+        matplotlib.lines.Line2D([0], [0], color=color_map[lab], lw=4, label=str(lab))
+        for lab in present_labs
+    ]
+    ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1.25, 1), title="groups")
+    ax.set_title(title)
+    plt.tight_layout()
+    return ax
+
+pair_order=(
+    'anterior-exc', 
+    'posterior-exc', 'other-exc', 'anterior-inh','posterior-inh',
+    'other-inh',
+    'other-other')
+non_match_group = lookuptable_df['FINAL NEURON ID'][lookuptable_df['Functional Category']=='Categorical Non-Match']
+non_match_group_int = {int(x) for x in non_match_group if pd.notna(x)}
+non_match_group = [item for item in non_match_group_int if item in selected_ids]
+cols_in_order = list(syn_sorted_func.columns)   # functional order from your earlier sort
+rows_in_order = [rid for rid in cols_in_order if rid in non_match_group]
+rows_in_order += [rid for rid in non_match_group if rid not in set(cols_in_order)]
+subset_mat = normalized_mat_selected.reindex(index=rows_in_order, columns=cols_in_order).fillna(0.0)
+col_labels = labels_fx.reindex(cols_in_order).fillna('other-other')
+col_labels = col_labels.where(col_labels.isin(pair_order), 'other-other')
+row_labels = pd.Series(index=rows_in_order, data='non-match-group')
+
+# 6) Call it
+plot_connectivity_matrix_asymmetric(
+    subset_mat,
+    row_labels=row_labels,            # single color down Y
+    col_labels=col_labels,            # functional colors across X (as before)
+    title='Subset: non_match_group (rows) × functional order (cols)',
+    cmap='RdBu_r'
+)
+plt.show()
 
 #%%
 def aggregate_connectivity_by_group(
@@ -537,7 +744,6 @@ def normalize_group_matrix(group_mat: pd.DataFrame, axis=1):
     else:
         raise ValueError("axis must be 0 (columns) or 1 (rows)")
     return norm_mat
-
 #%%
 # First aggregate
 group_means = aggregate_connectivity_by_group(syn_sorted_fx, labels_fx, aggfunc='mean')
@@ -556,10 +762,10 @@ custom_order = ["anterior-exc",
 
 
 ax = plot_group_connectivity(
-    group_means,
+    group_row_norm*1000,
     annot=True,
     fmt=".2f",
-    vmin=0, vmax=1,
+   # vmin=0, vmax=1,
     title="Row-normalized connectivity",
     order=custom_order
 )
