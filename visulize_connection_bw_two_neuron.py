@@ -171,3 +171,154 @@ def view_axon_dendrite_points(skel, root_id,
 # Example:
 link = view_axon_dendrite_points(skel, root_id)
 print(link)
+
+#%%
+
+# --- Config you already have ---
+IMAGE_SOURCE_URL = "precomputed://gs://zetta_jchen_mouse_cortex_001_alignment/img"
+SEG_SOURCE_URL   = "graphene://middleauth+https://cave.fanc-fly.com/segmentation/table/jchen_mouse_cortex/"
+VOXEL_RES = np.array([7.5, 7.5, 50.0], dtype=float)
+
+# --- Neuroglancer helpers (your wrapper) ---
+# from your environment:
+# from nglui.statebuilder import ViewerState, ImageLayer, SegmentationLayer
+
+def _unwrap_seg_props(nrn):
+    """Return segment_properties as a pandas DataFrame."""
+    sp = nrn.anno.segment_properties
+    # common attributes across versions
+    if hasattr(sp, "df"):
+        return sp.df
+    if hasattr(sp, "dataframe"):
+        return sp.dataframe
+    if hasattr(sp, "to_dataframe"):
+        return sp.to_dataframe()
+    raise AttributeError("Could not unwrap nrn.anno.segment_properties to a DataFrame.")
+
+def _segprops_mesh_to_strahler(seg_props_df):
+    """
+    Build dict: mesh_index(int) -> strahler(int).
+    Prefers 'mesh_ind_filt' if present, else falls back to 'mesh_ind'.
+    """
+    if "strahler" not in seg_props_df.columns:
+        raise KeyError("segment_properties missing 'strahler' column.")
+
+    mesh_col = "mesh_ind_filt" if "mesh_ind_filt" in seg_props_df.columns else "mesh_ind"
+    if mesh_col not in seg_props_df.columns:
+        raise KeyError("segment_properties missing 'mesh_ind' / 'mesh_ind_filt' column.")
+
+    mesh_to_strahler = {}
+    for _, row in seg_props_df.iterrows():
+        s = int(row["strahler"])
+        inds = row[mesh_col]
+        if inds is None:
+            continue
+        # inds can be list/array-like of mesh vertex indices
+        for mi in np.atleast_1d(inds):
+            mesh_to_strahler[int(mi)] = s
+    return mesh_to_strahler
+
+def _branch_vertex_mask(skel):
+    """Return boolean mask of skeleton vertices that are branch points (degree >= 3)."""
+    import networkx as nx
+    G = nx.Graph()
+    G.add_edges_from(np.asarray(skel.edges, dtype=int))
+    deg = np.array([G.degree(i) for i in range(len(skel.vertices))])
+    return deg >= 2
+
+def view_strahler_branch_points(skel, nrn, root_id,
+                                image_source=IMAGE_SOURCE_URL,
+                                seg_source=SEG_SOURCE_URL):
+    """
+    Build a Neuroglancer link with five point-annotation layers, one per Strahler order (1..5),
+    showing ONLY branch vertices (degree >= 3). Points are in voxel coords.
+    """
+    # unwrap seg props and build mesh->strahler lookup
+    seg_props = _unwrap_seg_props(nrn)
+    mesh_to_strahler = _segprops_mesh_to_strahler(seg_props)
+
+    # skeleton vertices (nm) -> to voxel
+    verts_nm = np.asarray(skel.vertices, dtype=float)
+    verts_vx = (verts_nm / VOXEL_RES).astype(float)
+
+    # branch mask
+    br_mask = _branch_vertex_mask(skel)
+    br_idx = np.where(br_mask)[0]
+
+    # map branch vertices -> strahler via mesh_index
+    skel_to_mesh = np.asarray(skel.mesh_index, dtype=int)
+    br_mesh_idx = skel_to_mesh[br_idx]
+    br_strahler = [mesh_to_strahler.get(int(mi), None) for mi in br_mesh_idx]
+
+    # bucketize points by strahler 1..5
+    order_to_points = {k: [] for k in [1, 2, 3, 4, 5]}
+    for idx, s in zip(br_idx, br_strahler):
+        if s in order_to_points:
+            order_to_points[s].append(tuple(verts_vx[idx]))
+
+    # base layers
+    img_layer = ImageLayer(source=image_source)
+    seg_layer = SegmentationLayer().add_source(seg_source).add_segments([int(root_id)])
+
+    vs = ViewerState().add_layer(img_layer).add_layer(seg_layer)
+
+    # add one points layer per order
+    # (colors are optional; you can omit to use defaults)
+    order_colors = {
+        1: "lime",
+        2: "gold",
+        3: "deepskyblue",
+        4: "violet",
+        5: "red"
+    }
+    for order in [1, 2, 3, 4, 5]:
+        pts = order_to_points[order]
+        if len(pts) == 0:
+            continue
+        vs = vs.add_points(
+            name=f"{root_id} — Strahler {order} (branch pts: n={len(pts)})",
+            data=pts,
+            color=order_colors.get(order, "white")
+        )
+
+    # optional: set layout/title
+    # vs = vs.set_state({"layout": "4panel", "title": f"{root_id} Strahler branches"})
+
+    return vs.to_link_shortener(client=client)
+
+# Example usage:
+link = view_strahler_branch_points(skel, nrn, root_id)
+print(link)
+
+
+#%%
+# --- Synapse visualization ---
+def view_synapses_with_location(syn_df, root_id,
+                                image_source=IMAGE_SOURCE_URL,
+                                seg_source=SEG_SOURCE_URL):
+    """
+    Neuroglancer link with a single point-annotation layer for all synapses.
+    Each point shows its branch-code location (post_pt_location) as description.
+    """
+    # base layers
+    img_layer = ImageLayer(source=image_source)
+    seg_layer = SegmentationLayer().add_source(seg_source).add_segments([int(root_id)])
+    vs = ViewerState().add_layer(img_layer).add_layer(seg_layer)
+
+    # collect points & descriptions
+    pts   = [tuple(np.asarray(p, float)) for p in syn_df["post_pt_position"]]
+    descs = syn_df["post_pt_location"].astype(str).tolist()
+
+    vs = vs.add_points(
+        name=f"{root_id} — synapses (n={len(pts)})",
+        data=pd.DataFrame({"pt": pts, "desc": descs}),
+        point_column="pt",
+        description_column="desc",
+        color="yellow"
+    )
+
+    return vs.to_link_shortener(client=client)
+
+# Example:
+link = view_synapses_with_location(syn_in_df, root_id)
+print(link)
