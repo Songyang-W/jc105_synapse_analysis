@@ -546,3 +546,46 @@ syn_in_df["post_pt_to_soma_distance_nm"] = dist_vals
 syn_in_df["post_pt_location"] = loc_codes
 syn_in_df["post_pt_label"] = labels
 
+dist_vals = []
+loc_codes = []
+labels    = []
+
+for r in syn_out_df.itertuples(index=False):
+    try:
+        sv_id = int(r.pre_pt_supervoxel_id)
+        sv_coord_nm = voxel_to_nm(r.pre_pt_position)
+        l2_id_current = int(sv_to_l2[sv_id])
+
+        out = synapse_geodesic_to_soma(
+            sv_coord_nm,
+            sv_id,
+            l2_coord_table,
+            l2_coord_table_nm,
+            l2_to_soma_dist_nm,
+            l2_to_skel,
+            axon_dend_df
+        )
+        dist_vals.append(out)
+
+        code, _, _ = synapse_branch_code(G, edge_label, T, root_l2, sv_id, axon_dend_df)
+        loc_codes.append(code)
+
+        if sv_is_root.get(sv_id, False):
+            labels.append("soma")
+        else:
+            labels.append("axon" if sv_is_axon.get(sv_id, 0) == 1 else "dendrite")
+
+    except Exception as e:
+        dist_vals.append(np.nan)
+        loc_codes.append(None)
+        labels.append("unknown")
+        print(f"Warning: failed on SV {getattr(r,'pre_pt_supervoxel_id',None)}: {e}")
+
+syn_out_df["pre_pt_to_soma_distance_nm"] = dist_vals
+syn_out_df["pre_pt_location"]            = loc_codes
+syn_out_df["pre_pt_label"]               = labels
+
+common_cols = list(set(syn_in_df.columns) & set(syn_out_df.columns))
+
+syn_all = pd.concat([syn_in_df, syn_out_df], join="outer", ignore_index=True)
+syn_all.to_csv(str(root_id)+".csv", index=False)
