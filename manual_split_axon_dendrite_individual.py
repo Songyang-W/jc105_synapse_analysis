@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Sep 15 16:37:29 2025
+
+@author: songyangwang
+"""
+
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -128,7 +136,7 @@ def _download_skel_identify_axon(root_id,root_resolution, client,soma_location):
         root_point = soma_location,
         root_point_resolution = root_resolution,
         collapse_soma = True,
-        collapse_radius = 4000,
+        collapse_radius = False,
         synapses=True,
     )
     pcg_skel.features.add_synapse_count(
@@ -177,11 +185,12 @@ def getting_supervoxel_id_from_nrn_manual_version(nrn):
 
 root_resolution = [7.5,7.5,50]
 #TODO
-root_ids = [720575941107829776]
+#root_ids = [720575941034757380, 720575941051511894, 720575941057622500, 720575941059432229, 720575941061126260, 720575941061128820, 720575941061146740, 720575941064570382, 720575941067985577, 720575941070678791, 720575941070687028, 720575941071245374, 720575941071680793, 720575941073277164, 720575941073777040, 720575941073819897, 720575941074810450, 720575941075022386, 720575941076332278, 720575941076653272, 720575941076758746, 720575941077619944, 720575941077776594, 720575941077787090, 720575941077967095, 720575941077982455, 720575941078093229, 720575941079569046, 720575941080298878, 720575941081168930, 720575941086022449, 720575941086431003, 720575941086890090, 720575941086891882, 720575941086918398, 720575941088008859, 720575941088408585, 720575941089298708, 720575941089521081, 720575941089937542, 720575941090078452, 720575941090093556, 720575941091424604, 720575941091445340, 720575941091459932, 720575941091629489, 720575941092498657, 720575941092554470, 720575941092565911, 720575941092573335, 720575941092921542, 720575941093443783, 720575941094478620, 720575941094704098, 720575941095549619, 720575941095921486, 720575941096535230, 720575941096669548, 720575941096896673, 720575941096935073, 720575941097347217, 720575941098226189, 720575941098234637, 720575941098551211, 720575941098673705, 720575941098730638, 720575941099131663, 720575941099212764, 720575941099267859, 720575941099645213, 720575941100429392, 720575941101423751, 720575941101452679, 720575941101509409, 720575941102657600, 720575941102668096, 720575941102712896, 720575941102870780, 720575941103533573, 720575941103924589, 720575941104131039, 720575941104297454, 720575941104309998, 720575941104699619, 720575941104700643, 720575941104705251, 720575941105379336, 720575941106152505, 720575941106477402, 720575941106600928, 720575941106639968, 720575941107285320, 720575941107298120, 720575941107437825, 720575941107829776, 720575941109570314, 720575941109605752, 720575941113287333, 720575941114006852, 720575941114011460, 720575941114493115, 720575941114493371, 720575941114494139, 720575941114687139, 720575941114711203, 720575941114933738, 720575941115332394, 720575941115960573, 720575941116548740, 720575941116572664, 720575941116663435, 720575941116976341, 720575941116997589, 720575941117000149, 720575941118374002, 720575941118374514, 720575941120382861, 720575941120702062, 720575941120904478, 720575941121184239, 720575941123725826, 720575941123736578, 720575941124436677, 720575941125743543, 720575941125953181, 720575941126229860, 720575941127918527, 720575941128195568, 720575941128216130, 720575941128500170, 720575941128608670, 720575941128703583, 720575941131576319, 720575941131588607, 720575941132405960, 720575941134134113, 720575941136000282, 720575941139252669, 720575941139510444, 720575941143312378, 720575941144379311, 720575941145828823, 720575941148267857, 720575941149954781, 720575941149993181, 720575941150910648, 720575941152155190, 720575941152796324, 720575941153471868, 720575941153561801, 720575941153566409, 720575941154431375, 720575941154453647, 720575941156114821, 720575941157944107, 720575941158042818, 720575941162298010, 720575941174542567, 720575941183694464, 720575941190025408, 720575941239851589]
+root_ids =[720575941088008859]
 for root_id in root_ids:
     try:
             
-            
+        #%%    
         row = lookuptable_df.loc[lookuptable_df['FINAL NEURON ID'] == str(root_id)].iloc[0]
         soma_xyz = [int(row['Xprod']), int(row['Yprod']), int(row['Zprod'])]
         #soma_xyz=[int(x.strip()) for x in lookuptable_df['soma coord'][lookuptable_df['FINAL NEURON ID']==str(root_id)].dropna().iloc[0].split(',')]
@@ -226,8 +235,46 @@ for root_id in root_ids:
         axon_dend_df = getting_supervoxel_id_from_nrn_manual_version(nrn)
         
         #axon_dend_df.to_pickle(str(root_id)+".pkl")
+        #%% load to synapse matrix
+        syn_in_df = client.materialize.synapse_query(
+                                                          post_ids=root_id,
+                                                          remove_autapses=True,
+                                                          desired_resolution=[7.5,7.5,50]
+                                                         )
         
+        syn_out_df = client.materialize.synapse_query(
+                                                          pre_ids=root_id,
+                                                          remove_autapses=True,
+                                                          desired_resolution=[7.5,7.5,50]
+                                                         )
         
+        pre_syn_coord = syn_in_df['post_pt_position']
+        center_coord = [int(x.strip()) for x in lookuptable_df['nuclear coord'][lookuptable_df['FINAL NEURON ID']==str(root_id)].dropna().iloc[0].split(',')]
+        pre_syn_coord = [list(row) for row in pre_syn_coord]
+        
+        def fit_sphere(coords):
+            # coords: (N,3) array
+            A = np.hstack((2*coords, np.ones((coords.shape[0],1))))
+            f = np.sum(coords**2, axis=1).reshape(-1,1)
+            C, residuals, _, _ = np.linalg.lstsq(A, f, rcond=None)
+            center = C[:3].ravel()
+            radius = np.sqrt(C[3] + np.sum(center**2))
+            return center, radius
+        
+        def rough_soma_radius_esti(pre_syn_coord,center_coord,syn_in_df,threshold=10000):
+            pre_syn_coord_nm = voxel_to_nm(pre_syn_coord)
+            center_coord_nm = voxel_to_nm(center_coord)
+            distances_to_center_nm = np.linalg.norm(pre_syn_coord_nm - center_coord_nm, axis=1)
+            filtered_coord = pre_syn_coord_nm[distances_to_center_nm<threshold]
+            center, radius = fit_sphere(filtered_coord)
+            new_dist_thre = np.linalg.norm(pre_syn_coord_nm - center_coord_nm, axis=1)<(radius+5000)
+            filtered_sv_id = syn_in_df['post_pt_supervoxel_id'][new_dist_thre]
+            return radius, center,filtered_sv_id
+        
+        radius, center,filtered_sv_id = rough_soma_radius_esti(pre_syn_coord,center_coord,syn_in_df)
+        sv_to_l2 = axon_dend_df.set_index("supervoxel_id")["l2_id"].to_dict()
+        filtered_l2_id = [sv_to_l2.get(sv) for sv in filtered_sv_id]
+        axon_dend_df["is_root_new"] = axon_dend_df["l2_id"].isin(filtered_l2_id)        
         #%% functions to calculate distance
         from collections import defaultdict
         
@@ -380,7 +427,7 @@ for root_id in root_ids:
         l2_neighbors = build_l2_neighbors(skel, nrn)
         l2_centroids_nm=l2_coord_table_nm
         
-        #%% filter the axon_dend_df and reassign l2
+        #%% filter the axon_dend_df and reassign l2, since some supervoxel's l2 is not skeletonized
         
         def reassign_l2(l2_id, l2_neighbors, l2_centroids_nm):
             """
@@ -409,6 +456,8 @@ for root_id in root_ids:
             return [int(d.idxmin())]
         
         # Ensure types are consistent
+        l2_is_axon_lookup = axon_dend_df.groupby("l2_id")["is_axon"].max().astype(int).to_dict()
+        l2_is_root_lookup = axon_dend_df.groupby("l2_id")["is_root"].max().astype(bool).to_dict()
         l2_centroids_nm.index = l2_centroids_nm.index.astype(np.int64)
         l2_neighbors = {int(k): list(map(int, v)) for k, v in l2_neighbors.items()}
         
@@ -418,92 +467,106 @@ for root_id in root_ids:
             return int(res if isinstance(res, (int, np.integer)) else res[0])
         
         # Apply to all rows so every supervoxel binds to an L2 that has at least one neighbor
-        axon_dend_df["l2_id"] = axon_dend_df["l2_id"].apply(_reassign_l2_int)
+        axon_dend_df["l2_id"]   = axon_dend_df["l2_id"].apply(_reassign_l2_int)
+        axon_dend_df["is_axon"] = axon_dend_df["l2_id"].map(l2_is_axon_lookup).fillna(0).astype(int)
+        axon_dend_df["is_root"] = axon_dend_df["l2_id"].map(l2_is_root_lookup).fillna(False).astype(bool)
         
         
         
         
         #%% working on synapse labelling
+        import numpy as np
+        import pandas as pd
+        import networkx as nx
         import string
-        def build_l2_graph_and_centroids_nm(skel, nrn):
-            """Returns G (L2 graph, undirected), l2_centroids_nm (pd.Series index=l2_id -> [x,y,z])."""
-            lvl2_df = nrn.anno.lvl2_ids
-            skel_to_mesh = np.asarray(skel.mesh_index, dtype=int)
-            mesh_to_l2   = np.asarray(lvl2_df["lvl2_id"], dtype=np.int64)
-            skel_to_l2   = mesh_to_l2[skel_to_mesh]
         
-            # Graph: connect L2s that meet along skeleton edges
+        # --- Config: letters for branch labeling
+        LETTERS = list(string.ascii_uppercase)  # A, B, C, ...
+        
+        # --- Minimal centroid helper (nm)
+        def compute_l2_centroids_nm(nrn):
+            """pd.Series: index=l2_id -> centroid [x,y,z] in nm."""
+            verts_nm = np.asarray(nrn.mesh.vertices, float)
+            l2_ids   = np.asarray(nrn.anno.lvl2_ids["lvl2_id"], np.int64)
+            df_nm    = pd.DataFrame({"l2_id": l2_ids, "coord": list(verts_nm)})
+            return df_nm.groupby("l2_id")["coord"].apply(lambda cs: np.mean(np.stack(cs), axis=0))
+        
+        # --- Build undirected L2 graph from skeleton edges
+        def build_l2_graph(skel, nrn):
+            """L2 graph from skeleton edges (no weights)."""
+            lvl2 = np.asarray(nrn.anno.lvl2_ids["lvl2_id"], np.int64)
+            sk2m = np.asarray(skel.mesh_index, dtype=int)
+            sk2l2 = lvl2[sk2m]
+        
             G = nx.Graph()
-            for u, v in skel.edges:
-                lu, lv = int(skel_to_l2[u]), int(skel_to_l2[v])
+            for u, v in np.asarray(skel.edges, dtype=int):
+                lu, lv = int(sk2l2[u]), int(sk2l2[v])
                 if lu != lv:
                     G.add_edge(lu, lv)
+            return G
         
-            # Centroids (nm): mean of mesh vertices per L2
-            verts_nm = np.asarray(nrn.mesh.vertices, float)
-            l2_ids   = np.asarray(lvl2_df["lvl2_id"], np.int64)
-            df_nm    = pd.DataFrame({"l2_id": l2_ids, "coord": list(verts_nm)})
-            l2_centroids_nm = df_nm.groupby("l2_id")["coord"].apply(lambda cs: np.mean(np.stack(cs), axis=0))
+        # --- Make a forest by removing edges that touch soma L2s
+        def forest_excluding_soma(G_full, soma_l2_list, l2_centroids_nm=None, virtual_root="SOMA"):
+            """
+            1) Remove edges that involve any soma L2.
+            2) Connected components on remaining edges -> per-component BFS trees.
+            3) Optionally connect all trees to a single virtual root for visualization.
+            """
+            soma_set = set(map(int, soma_l2_list))
         
-            return G, l2_centroids_nm
-        
-        def find_root_l2(soma_index, skel, nrn):
-            # unwrap lvl2 table if needed
-            lvl2_df = nrn.anno.lvl2_ids
-           
-            sk2m = np.asarray(skel.mesh_index, dtype=int)
-            m2l2 = np.asarray(lvl2_df["lvl2_id"], dtype=np.int64)
-        
-            # map skeleton vertex -> L2 with validity guard
-            sk2l2 = np.full(len(sk2m), -1, dtype=np.int64)
-            valid = (sk2m >= 0) & (sk2m < len(m2l2))
-            sk2l2[valid] = m2l2[sk2m[valid]]
-        
-            # try the soma vertex directly
-            s = int(soma_index)
-            l2_here = int(sk2l2[s])
-            if l2_here >= 0:
-                return l2_here
-        
-            # fall back: BFS from soma to nearest vertex with a valid L2
-            import networkx as nx
+            # Strip edges touching soma
             G = nx.Graph()
-            G.add_edges_from(np.asarray(skel.edges, dtype=int))
+            G.add_nodes_from(G_full.nodes())
+            G.add_edges_from((u, v) for u, v in G_full.edges() if u not in soma_set and v not in soma_set)
         
-            from collections import deque
-            seen = {s}
-            q = deque([s])
-            while q:
-                u = q.popleft()
-                for v in G.neighbors(u):
-                    if v in seen:
-                        continue
-                    seen.add(v)
-                    l2v = int(sk2l2[v])
-                    if l2v >= 0:
-                        return l2v
-                    q.append(v)
+            # Choose a representative seed per component (prefer a node that originally touched soma)
+            def choose_seed(comp_nodes):
+                comp = set(comp_nodes)
+                boundary = [n for n in comp if any(nb in soma_set for nb in G_full.neighbors(n))]
+                if boundary and l2_centroids_nm is not None:
+                    soma_ctr = np.mean(
+                        np.stack([np.asarray(l2_centroids_nm.loc[s], float)
+                                  for s in soma_set if s in l2_centroids_nm.index]),
+                        axis=0
+                    )
+                    b_coords = [np.asarray(l2_centroids_nm.loc[b], float)
+                                for b in boundary if b in l2_centroids_nm.index]
+                    if b_coords:
+                        d = [np.linalg.norm(c - soma_ctr) for c in b_coords]
+                        return boundary[int(np.argmin(d))]
+                return boundary[0] if boundary else next(iter(comp))
         
-            raise ValueError("find_root_l2: no valid L2 found reachable from soma_index")
+            # Build BFS tree per component
+            forest = {}
+            seeds  = []
+            for comp_nodes in nx.connected_components(G):
+                seed = choose_seed(comp_nodes)
+                T = nx.bfs_tree(G.subgraph(comp_nodes), seed)
+                forest[seed] = T
+                seeds.append(seed)
         
+        
+            return forest, seeds
+        
+        # --- Deterministic child ordering at branch (used by labeler)
         def _child_order_at_branch(G, node, l2_centroids_nm, parent=None):
             ctr = np.asarray(l2_centroids_nm.loc[node], float)
             nbrs = list(G.neighbors(node))
             if parent is not None:
-                nbrs = [n for n in nbrs if n != parent]  # exclude inbound leg
+                nbrs = [n for n in nbrs if n != parent]
             if not nbrs:
                 return []
             vecs = {n: np.asarray(l2_centroids_nm.loc[n], float) - ctr for n in nbrs}
             angs = {n: np.arctan2(v[1], v[0]) for n, v in vecs.items()}
             return sorted(nbrs, key=lambda n: angs[n])
         
+        # --- Per-tree branch labeler (letters A,B,C,... at each branch)
         def label_branch_children(G, root_l2, l2_centroids_nm):
             T = nx.bfs_tree(G, root_l2)
             edge_label = {}
             for node in T.nodes():
                 children = list(T.successors(node))
                 if len(children) >= 2:
-                    # NEW: find parent in the BFS tree (None at root)
                     preds = list(T.predecessors(node))
                     parent = preds[0] if len(preds) else None
                     ordered_children = _child_order_at_branch(G, node, l2_centroids_nm, parent=parent)
@@ -512,67 +575,71 @@ for root_id in root_ids:
                         edge_label[(node, child)] = LETTERS[i % len(LETTERS)]
             return edge_label, T
         
+        # --- Prepare labelers for each tree and assign a stable tree letter (A,B,C,...)
+        def prepare_tree_labelers(G_full, forest, l2_centroids_nm):
+            seeds_sorted = sorted(forest.keys())
+            per_tree = {}
+            for i, seed in enumerate(seeds_sorted):
+                letter = LETTERS[i % len(LETTERS)]
+                nodes  = list(forest[seed].nodes())
+                G_sub  = G_full.subgraph(nodes).copy()              # undirected subgraph for labeling
+                edge_label, T = label_branch_children(G_sub, seed, l2_centroids_nm)
+                per_tree[seed] = {"letter": letter, "G": G_sub, "T": T, "edge_label": edge_label}
+            return per_tree
+        
+        # --- Intra-tree code (A2B3...) given a synapse SV (uses your axon_dend_df mapping)
         def synapse_branch_code(G, edge_label, T, root_l2, sv_id, axon_dend_df):
-            """
-            Returns:
-              - code (str): e.g. 'A1B2D'
-              - steps (list of tuples): [(branch_node, child, letter, branch_idx), ...]
-              - n_branches (int)
-            """
             synapse_l2 = axon_dend_df.loc[axon_dend_df['supervoxel_id'] == sv_id, 'l2_id'].item()
             if synapse_l2 not in T:
-                print(f"L2_NOT_IN_TREE:{int(synapse_l2)}")
                 return f"L2_NOT_IN_TREE:{int(synapse_l2)}", [], 0
-            else:
-                path = nx.shortest_path(T, root_l2, synapse_l2)
-            
-            code = []
-            steps = []
-            branch_idx = 1
+            path = nx.shortest_path(T, root_l2, synapse_l2)
+            code, steps, branch_idx = [], [], 2  # start at 2 (we’ll add TreeLetter1 outside)
             for u, v in zip(path[:-1], path[1:]):
                 letter = edge_label.get((u, v), None)
                 if letter is not None:
                     code.append(f"{letter}{branch_idx}")
                     steps.append((u, v, letter, branch_idx))
                     branch_idx += 1
-            
             return "".join(code), steps, len(code)
         
+        # --- Final label for a synapse across the forest: TreeLetter + intra-tree code
+        def synapse_code_across_forest(sv_id, axon_dend_df, per_tree):
+            syn_l2 = int(axon_dend_df.loc[axon_dend_df['supervoxel_id'] == sv_id, 'l2_id'].item())
+            for seed, stuff in per_tree.items():
+                T = stuff["T"]
+                if syn_l2 in T:
+                    intra, _, _ = synapse_branch_code(stuff["G"], stuff["edge_label"], T, seed, sv_id, axon_dend_df)
+                    return f"{stuff['letter']}1{intra}"  # e.g. C1A2B3...
+            return None
         
         
-        
-        LETTERS = list(string.ascii_uppercase)  # A, B, C, ...
-        
-        
-        G, l2_centroids_nm = build_l2_graph_and_centroids_nm(skel, nrn)
-        root_l2 = find_root_l2(soma_index, skel, nrn)
-        edge_label, T = label_branch_children(G, root_l2, l2_centroids_nm)
-        
-        
-        #%% load to synapse matrix
-        syn_in_df = client.materialize.synapse_query(
-                                                          post_ids=root_id,
-                                                          remove_autapses=True,
-                                                          desired_resolution=[7.5,7.5,50]
-                                                         )
-        
-        syn_out_df = client.materialize.synapse_query(
-                                                          pre_ids=root_id,
-                                                          remove_autapses=True,
-                                                          desired_resolution=[7.5,7.5,50]
-                                                         )
-        
+
         #%%
         
         # --- Enrich syn_in_df with distance, location code, and label (with try/except) ---
         
         sv_to_l2   = axon_dend_df.set_index("supervoxel_id")["l2_id"].to_dict()
         sv_is_axon = axon_dend_df.set_index("supervoxel_id")["is_axon"].to_dict()
-        sv_is_root = axon_dend_df.set_index("supervoxel_id")["is_root"].to_dict()
+        sv_is_root = axon_dend_df.set_index("supervoxel_id")["is_root_new"].to_dict()
         
         dist_vals = []
         loc_codes = []
         labels    = []
+        
+        # --- Build forest once (before the loops) ---
+        G_full = build_l2_graph(skel, nrn)
+        
+        soma_l2_list = (
+            axon_dend_df.loc[axon_dend_df['is_root_new'], 'l2_id']
+            .astype(np.int64).unique().tolist()
+        )
+        
+        l2_centroids_nm = compute_l2_centroids_nm(nrn)
+        
+        forest, seeds = forest_excluding_soma(
+            G_full, soma_l2_list, l2_centroids_nm, virtual_root=None
+        )
+        per_tree = prepare_tree_labelers(G_full, forest, l2_centroids_nm)
         
         for r in syn_in_df.itertuples(index=False):
             try:
@@ -590,10 +657,9 @@ for root_id in root_ids:
                 )
                 dist_vals.append(out)
         
-                code, _, _ = synapse_branch_code(G, edge_label, T, root_l2,sv_id,axon_dend_df)
-                # if code and code[-1].isdigit():
-                #     code = code[:-1]
+                code = synapse_code_across_forest(sv_id, axon_dend_df, per_tree)
                 loc_codes.append(code)
+                
         
                 if sv_is_root.get(sv_id, False):
                     labels.append("soma")
@@ -631,7 +697,7 @@ for root_id in root_ids:
                 )
                 dist_vals.append(out)
         
-                code, _, _ = synapse_branch_code(G, edge_label, T, root_l2, sv_id, axon_dend_df)
+                code = synapse_code_across_forest(sv_id, axon_dend_df, per_tree)
                 loc_codes.append(code)
         
                 if sv_is_root.get(sv_id, False):
@@ -652,6 +718,8 @@ for root_id in root_ids:
         common_cols = list(set(syn_in_df.columns) & set(syn_out_df.columns))
         
         syn_all = pd.concat([syn_in_df, syn_out_df], join="outer", ignore_index=True)
+    
+        #%%
         syn_all.to_csv(saving_directory+str(root_id)+".csv", index=False)
     except ValueError:
         print("Error on "+ str(root_id))
@@ -663,3 +731,6 @@ for root_id in root_ids:
         else:
             # re-raise if it's some other error you don't want to ignore
             raise
+            
+
+
