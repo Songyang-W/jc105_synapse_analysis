@@ -13,20 +13,34 @@ import pcg_skel
 from skeleton_plot.plot_tools import plot_skel
 from caveclient import CAVEclient
 from meshparty import skeleton as mp_skel
-<<<<<<< HEAD
-client = CAVEclient("jchen_mouse_cortex")
+import sys
+from requests.exceptions import HTTPError  # you already use this in your try/except
 
-#%%
-#table_directory = '/net/claustrum/mnt/data/Dropbox/Chen Lab Dropbox/Chen Lab Team Folder/Projects/Connectomics/Animals/jc105/LOOKUP_TABLE.xlsx'
-saving_directory = '/net/claustrum/mnt/data/Dropbox/Chen Lab Dropbox/Chen Lab Team Folder/Projects/Connectomics/Animals/jc105/skeleton_synapse/'
-table_directory = '/Users/songyangwang/Downloads/LOOKUP_TABLE.xlsx'
-=======
+def _parse_root_ids_from_argv(argv):
+    """
+    Accept either:
+      - space-separated IDs:  python script.py 7205759 7205760 7205761
+      - a single comma-separated string: python script.py 7205759,7205760,7205761
+      - a .txt file path (one ID per line): python script.py ids.txt
+    """
+    if not argv:
+        return None
+
+    # single file path case
+    if len(argv) == 1 and argv[0].lower().endswith(".txt"):
+        with open(argv[0], "r") as f:
+            return [int(line.strip()) for line in f if line.strip()]
+
+    # combine everything, split by commas, strip, cast to int
+    parts = []
+    for token in argv:
+        parts.extend(token.split(","))
+    return [int(x.strip()) for x in parts if x.strip()]
 
 #%%
 table_directory = '/net/claustrum/mnt/data/Dropbox/Chen Lab Dropbox/Chen Lab Team Folder/Projects/Connectomics/Animals/jc105/LOOKUP_TABLE.xlsx'
 saving_directory = '/net/claustrum/mnt/data/Dropbox/Chen Lab Dropbox/Chen Lab Team Folder/Projects/Connectomics/Animals/jc105/skeleton_synapse/'
 #table_directory = '/Users/songyangwang/Downloads/LOOKUP_TABLE.xlsx'
->>>>>>> 04c9dccb1c3fbf74434479a16ad085b5f4e3b57c
 lookuptable_df = pd.read_excel(table_directory, sheet_name="MASTER_LIST",
                    dtype={
         "SHARD ID": "string",
@@ -99,13 +113,7 @@ def label_axon_by_simple_split(skel, soma_idx, axon_idx, axon_label=2, dend_labe
         H.remove_edge(split_u, split_v)
     else:
         # if graph stored as directed or missing that edge, ensure removal either way
-<<<<<<< HEAD
-        raise ValueError(
-            f"Expected edge ({split_u}, {split_v}) not found in graph when splitting."
-        )
-=======
         H.remove_edges_from([(split_u, split_v), (split_v, split_u)])
->>>>>>> 04c9dccb1c3fbf74434479a16ad085b5f4e3b57c
     comps = list(nx.connected_components(H))
     # map vertex -> component index
     comp_idx = {}
@@ -194,45 +202,19 @@ def getting_supervoxel_id_from_nrn_manual_version(nrn):
 
     axon_dend_df = pd.DataFrame(records)
     return axon_dend_df
-<<<<<<< HEAD
-
-import string
-
-def make_branch_letters(n):
-    """
-    Generate up to n branch labels like Excel columns:
-    A, B, ..., Z, AA, AB, ...
-    """
-    letters = []
-    alphabet = string.ascii_uppercase
-    base = len(alphabet)
-
-    for i in range(n):
-        label = ""
-        x = i
-        while True:
-            label = alphabet[x % base] + label
-            x = x // base - 1
-            if x < 0:
-                break
-        letters.append(label)
-    return letters
-LETTERS = make_branch_letters(200)  # enough for 200 branches
-
-=======
->>>>>>> 04c9dccb1c3fbf74434479a16ad085b5f4e3b57c
 #%%
 
 #root_id=720575941115960573
 
 root_resolution = [7.5,7.5,50]
 #TODO
-#root_ids = [720575941034757380, 720575941051511894, 720575941057622500, 720575941059432229, 720575941061126260, 720575941061128820, 720575941061146740, 720575941064570382, 720575941067985577, 720575941070678791, 720575941070687028, 720575941071245374, 720575941071680793, 720575941073277164, 720575941073777040, 720575941073819897, 720575941074810450, 720575941075022386, 720575941076332278, 720575941076653272, 720575941076758746, 720575941077619944, 720575941077776594, 720575941077787090, 720575941077967095, 720575941077982455, 720575941078093229, 720575941079569046, 720575941080298878, 720575941081168930, 720575941086022449, 720575941086431003, 720575941086890090, 720575941086891882, 720575941086918398, 720575941088008859, 720575941088408585, 720575941089298708, 720575941089521081, 720575941089937542, 720575941090078452, 720575941090093556, 720575941091424604, 720575941091445340, 720575941091459932, 720575941091629489, 720575941092498657, 720575941092554470, 720575941092565911, 720575941092573335, 720575941092921542, 720575941093443783, 720575941094478620, 720575941094704098, 720575941095549619, 720575941095921486, 720575941096535230, 720575941096669548, 720575941096896673, 720575941096935073, 720575941097347217, 720575941098226189, 720575941098234637, 720575941098551211, 720575941098673705, 720575941098730638, 720575941099131663, 720575941099212764, 720575941099267859, 720575941099645213, 720575941100429392, 720575941101423751, 720575941101452679, 720575941101509409, 720575941102657600, 720575941102668096, 720575941102712896, 720575941102870780, 720575941103533573, 720575941103924589, 720575941104131039, 720575941104297454, 720575941104309998, 720575941104699619, 720575941104700643, 720575941104705251, 720575941105379336, 720575941106152505, 720575941106477402, 720575941106600928, 720575941106639968, 720575941107285320, 720575941107298120, 720575941107437825, 720575941107829776, 720575941109570314, 720575941109605752, 720575941113287333, 720575941114006852, 720575941114011460, 720575941114493115, 720575941114493371, 720575941114494139, 720575941114687139, 720575941114711203, 720575941114933738, 720575941115332394, 720575941115960573, 720575941116548740, 720575941116572664, 720575941116663435, 720575941116976341, 720575941116997589, 720575941117000149, 720575941118374002, 720575941118374514, 720575941120382861, 720575941120702062, 720575941120904478, 720575941121184239, 720575941123725826, 720575941123736578, 720575941124436677, 720575941125743543, 720575941125953181, 720575941126229860, 720575941127918527, 720575941128195568, 720575941128216130, 720575941128500170, 720575941128608670, 720575941128703583, 720575941131576319, 720575941131588607, 720575941132405960, 720575941134134113, 720575941136000282, 720575941139252669, 720575941139510444, 720575941143312378, 720575941144379311, 720575941145828823, 720575941148267857, 720575941149954781, 720575941149993181, 720575941150910648, 720575941152155190, 720575941152796324, 720575941153471868, 720575941153561801, 720575941153566409, 720575941154431375, 720575941154453647, 720575941156114821, 720575941157944107, 720575941158042818, 720575941162298010, 720575941174542567, 720575941183694464, 720575941190025408, 720575941239851589]
-<<<<<<< HEAD
-root_ids =[720575941034757380]
-=======
-root_ids =[720575941088008859]
->>>>>>> 04c9dccb1c3fbf74434479a16ad085b5f4e3b57c
+# If IDs are passed on the command line, use those; otherwise fall back to your hardcoded list
+_cli_ids = _parse_root_ids_from_argv(sys.argv[1:])
+if _cli_ids is not None and len(_cli_ids) > 0:
+    root_ids = _cli_ids
+else:
+    root_ids = [720575941088008859]  # your default/fallback list
+#root_ids =[720575941088008859]
 for root_id in root_ids:
     try:
             
@@ -251,11 +233,7 @@ for root_id in root_ids:
             except Exception:
                 # fallback: not a proper coord string
                 axon_xyz = None
-<<<<<<< HEAD
-        
-=======
         client = CAVEclient("jchen_mouse_cortex")
->>>>>>> 04c9dccb1c3fbf74434479a16ad085b5f4e3b57c
         #client.materialize.version = 10
         skel,nrn,(l2_to_skel, skel_to_l2) = _download_skel_identify_axon(root_id,root_resolution, client,soma_xyz)
         
@@ -518,11 +496,7 @@ for root_id in root_ids:
         
         # Apply to all rows so every supervoxel binds to an L2 that has at least one neighbor
         axon_dend_df["l2_id"]   = axon_dend_df["l2_id"].apply(_reassign_l2_int)
-<<<<<<< HEAD
-        axon_dend_df["is_axon_new"] = axon_dend_df["l2_id"].map(l2_is_axon_lookup).fillna(0).astype(int)
-=======
         axon_dend_df["is_axon"] = axon_dend_df["l2_id"].map(l2_is_axon_lookup).fillna(0).astype(int)
->>>>>>> 04c9dccb1c3fbf74434479a16ad085b5f4e3b57c
         axon_dend_df["is_root"] = axon_dend_df["l2_id"].map(l2_is_root_lookup).fillna(False).astype(bool)
         
         
@@ -668,75 +642,12 @@ for root_id in root_ids:
         
         
 
-<<<<<<< HEAD
-#%%
-import re
-
-def dominant_presyn_branch(syn_out_df, col="pre_pt_location"):
-    """
-    Count presynapses by the first letter of their pre_pt_location code.
-    Returns (top_letter, counts_series) where counts_series is sorted desc.
-    """
-    # extract first A–Z letter from each non-null code
-    letters = (
-        syn_out_df[col]
-        .dropna()
-        .astype(str)
-        .map(lambda s: re.search(r"[A-Z]", s))
-        .dropna()
-        .map(lambda m: m.group(0))
-    )
-    counts = letters.value_counts()
-
-    top_letter = counts.index[0] if not counts.empty else None
-    return top_letter, counts
-
-# Optional: keep the per-row first letter for reference
-def add_presyn_tree_letter(syn_out_df, col="pre_pt_location", out_col="pre_pt_tree_letter"):
-    syn_out_df[out_col] = (
-        syn_out_df[col]
-        .astype(str)
-        .map(lambda s: (re.search(r"[A-Z]", s) or [None])[0] if s else None)
-    )
-    return syn_out_df
-
-
-def relabel_by_top_letter(syn_in_df, syn_out_df, top_letter):
-    """
-    Update *_pt_label in syn_in_df and syn_out_df:
-      - If *_pt_location starts with top_letter → 'axon'
-      - Else → 'dendrite'
-      - Root flags (soma) remain 'soma'
-      - Unknown remain 'unknown'
-    """
-    def update_labels(df, loc_col, label_col):
-        new_labels = []
-        for loc, old in zip(df[loc_col], df[label_col]):
-            if old == "soma" or old == "unknown":
-                new_labels.append(old)
-            elif isinstance(loc, str) and loc.startswith(top_letter):
-                new_labels.append("axon")
-            else:
-                new_labels.append("dendrite")
-        df[label_col] = new_labels
-        return df
-
-    syn_in_df  = update_labels(syn_in_df,  "post_pt_location", "post_pt_label")
-    syn_out_df = update_labels(syn_out_df, "pre_pt_location",  "pre_pt_label")
-
-    return syn_in_df, syn_out_df
-=======
->>>>>>> 04c9dccb1c3fbf74434479a16ad085b5f4e3b57c
         #%%
         
         # --- Enrich syn_in_df with distance, location code, and label (with try/except) ---
         
         sv_to_l2   = axon_dend_df.set_index("supervoxel_id")["l2_id"].to_dict()
-<<<<<<< HEAD
-        sv_is_axon = axon_dend_df.set_index("supervoxel_id")["is_axon_new"].to_dict()
-=======
         sv_is_axon = axon_dend_df.set_index("supervoxel_id")["is_axon"].to_dict()
->>>>>>> 04c9dccb1c3fbf74434479a16ad085b5f4e3b57c
         sv_is_root = axon_dend_df.set_index("supervoxel_id")["is_root_new"].to_dict()
         
         dist_vals = []
@@ -849,8 +760,5 @@ def relabel_by_top_letter(syn_in_df, syn_out_df, top_letter):
             # re-raise if it's some other error you don't want to ignore
             raise
             
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 04c9dccb1c3fbf74434479a16ad085b5f4e3b57c

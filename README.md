@@ -28,4 +28,4 @@ This script analyzes synaptic connectivity between a set of **proofread neurons*
 
 ## Requirements
 ```bash
-pip install caveclient pandas matplotlib seaborn
+pip install caveclient pandas matplotlib seaborn pcg_skel skeleton_plot
